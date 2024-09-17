@@ -1,0 +1,431 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int            @id @unique @default(autoincrement())
+  uuid           String         @unique @default(uuid())
+  name           String
+  surname        String
+  fullName       String?
+  phone          String
+  address        String
+  email          String         @unique
+  password       String
+  dateOfBirth    DateTime?      @db.Date
+  isActive       Boolean        @default(true)
+  profile        Profile?       @relation(fields: [profileId], references: [id])
+  department     Department?    @relation(fields: [departmentId], references: [id])
+  country        Country        @relation(fields: [countryId], references: [id])
+  state          State          @relation(fields: [stateId], references: [id])
+  city           City           @relation(fields: [cityId], references: [id])
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @default(now()) @updatedAt
+  profileId      Int?
+  departmentId   Int?
+  countryId      Int
+  stateId        Int
+  cityId         Int
+  permissions    Permissions[]
+  ordersAsClient Order[]        @relation("ClientOrders")
+  ordersAsSeller Order[]        @relation("SellerOrders")
+  addresses      Address[]
+  orderAddresses OrderAddress[]
+}
+
+model Module {
+  id          Int           @id @unique @default(autoincrement())
+  name        String
+  path        String?
+  icon        String?
+  code        String?
+  isActive    Boolean       @default(true)
+  parent      Module?       @relation(name: "ParentModule", fields: [moduleId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
+  children    Module[]      @relation("ParentModule")
+  moduleId    Int?
+  Permissions Permissions[]
+}
+
+model Permissions {
+  id        Int      @id @unique @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  module    Module   @relation(fields: [moduleId], references: [id])
+  profile   Profile  @relation(fields: [profileId], references: [id])
+  access    Boolean  @default(false)
+  create    Boolean  @default(false)
+  update    Boolean  @default(false)
+  delete    Boolean  @default(false)
+  print     Boolean  @default(false)
+  report    Boolean  @default(false)
+  others    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  userId    Int
+  moduleId  Int
+  profileId Int
+}
+
+model Profile {
+  id          Int           @id @unique @default(autoincrement())
+  name        String
+  description String?
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
+  User        User[]
+  Permissions Permissions[]
+}
+
+model Department {
+  id          Int      @id @unique @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  User        User[]
+}
+
+model Role {
+  id          Int      @id @unique @default(autoincrement())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model Country {
+  id           Int            @id @unique @default(autoincrement())
+  name         String
+  code         String
+  prefix       String
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now()) @updatedAt
+  User         User[]
+  State        State[]
+  Address      Address[]
+  OrderAddress OrderAddress[]
+}
+
+model State {
+  id            Int             @id @unique @default(autoincrement())
+  name          String          @unique
+  isActive      Boolean         @default(true)
+  country       Country         @relation(fields: [countryId], references: [id])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  User          User[]
+  countryId     Int
+  City          City[]
+  CompanyBranch CompanyBranch[]
+  Address       Address[]
+  OrderAddress  OrderAddress[]
+}
+
+model City {
+  id            Int             @id @unique @default(autoincrement())
+  name          String
+  isActive      Boolean         @default(true)
+  state         State           @relation(fields: [stateId], references: [id])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  User          User[]
+  stateId       Int
+  CompanyBranch CompanyBranch[]
+  Address       Address[]
+  OrderAddress  OrderAddress[]
+}
+
+model Company {
+  id             Int             @id @unique @default(autoincrement())
+  name           String
+  img            String?
+  useEmailServer Boolean         @default(false)
+  emailServer    Email?          @relation(fields: [emailId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now()) @updatedAt
+  emailId        Int?
+  CompanyBranch  CompanyBranch[]
+}
+
+model Email {
+  id        Int       @id @unique @default(autoincrement())
+  host      String
+  port      Int
+  password  String
+  ssl       Boolean   @default(true)
+  from      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  Company   Company[]
+}
+
+model CompanyBranch {
+  id                 Int           @id @unique @default(autoincrement())
+  companyName        String
+  ruc                String
+  address            String
+  iva                Float
+  printTicket        Boolean       @default(true)
+  isAccounting       Boolean       @default(false)
+  isRimpe            Boolean       @default(false)
+  isWithholdingAgent Boolean       @default(true)
+  resolutionAgent    String?
+  rimpeDescription   String?
+  environment        Int?
+  company            Company       @relation(fields: [companyId], references: [id])
+  state              State         @relation(fields: [stateId], references: [id])
+  city               City          @relation(fields: [cityId], references: [id])
+  emissionPoint      EmissionPoint @relation(fields: [emissionPointId], references: [id])
+  signature          Signature?    @relation(fields: [signatureId], references: [id])
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @default(now()) @updatedAt
+  companyId          Int
+  stateId            Int
+  cityId             Int
+  emissionPointId    Int
+  signatureId        Int?
+  Price              Price[]
+}
+
+model EmissionPoint {
+  id            Int             @id @unique @default(autoincrement())
+  serie         String
+  number        Int
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  CompanyBranch CompanyBranch[]
+}
+
+model Signature {
+  id            Int             @id @unique @default(autoincrement())
+  file          String
+  password      String
+  expiration    DateTime?
+  description   String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now()) @updatedAt
+  CompanyBranch CompanyBranch[]
+}
+
+model EmailTemplates {
+  id        Int      @id @unique @default(autoincrement())
+  name      String
+  subject   String
+  message   String
+  template  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Product {
+  id                Int                 @id @unique @default(autoincrement())
+  code              String              @unique
+  name              String
+  description       String?
+  slug              String
+  metaDescription   String
+  isInventoried     Boolean             @default(false)
+  isIva             Boolean             @default(false)
+  isActive          Boolean             @default(true)
+  isVisibleWeb      Boolean             @default(false)
+  category          Category            @relation(fields: [categoryId], references: [id])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now()) @updatedAt
+  categoryId        Int
+  ProductPrice      ProductPrice[]
+  ProductImage      ProductImage[]
+  ProductIngredient ProductIngredient[]
+  OrderDetail       OrderDetail[]
+}
+
+model Category {
+  id              Int       @id @unique @default(autoincrement())
+  name            String
+  description     String
+  metaDescription String?
+  slug            String
+  isActive        Boolean   @default(true)
+  isVisibleWeb    Boolean   @default(false)
+  image           Image?    @relation(fields: [imageId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+  Product         Product[]
+  imageId         Int?
+}
+
+model Ingredient {
+  id                Int                 @id @unique @default(autoincrement())
+  name              String
+  description       String?
+  isActive          Boolean             @default(true)
+  image             Image?              @relation(fields: [imageId], references: [id])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now()) @updatedAt
+  imageId           Int?
+  ProductIngredient ProductIngredient[]
+}
+
+model Price {
+  id                  Int            @id @unique @default(autoincrement())
+  name                String
+  description         String?
+  incrementPercentage Decimal?
+  isActive            Boolean        @default(true)
+  companyBranch       CompanyBranch  @relation(fields: [companyBranchId], references: [id])
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @default(now()) @updatedAt
+  companyBranchId     Int
+  ProductPrice        ProductPrice[]
+  OrderDetail         OrderDetail[]
+}
+
+model Image {
+  id           Int            @id @unique @default(autoincrement())
+  img          String
+  name         String
+  alt          String?
+  title        String?
+  description  String?
+  size         Float?
+  length       String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now()) @updatedAt
+  Category     Category[]
+  Ingredient   Ingredient[]
+  ProductImage ProductImage[]
+}
+
+model Log {
+  id        Int      @id @unique @default(autoincrement())
+  message   String?
+  module    String?
+  clas      String?
+  method    String?
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model ProductPrice {
+  id        Int      @id @unique @default(autoincrement())
+  price     Price    @relation(fields: [priceId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+  priceVal  Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  priceId   Int
+  productId Int
+}
+
+model ProductImage {
+  id        Int      @id @unique @default(autoincrement())
+  product   Product  @relation(fields: [productId], references: [id])
+  image     Image?   @relation(fields: [imageId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  productId Int
+  imageId   Int?
+}
+
+model ProductIngredient {
+  id           Int        @id @unique @default(autoincrement())
+  product      Product    @relation(fields: [productId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
+  productId    Int
+  ingredientId Int
+}
+
+model Order {
+  id             Int          @id @unique @default(autoincrement())
+  date           DateTime     @default(now())
+  observation    String?
+  phone          String
+  email          String
+  status         Status       @default(REGISTERED)
+  client         User         @relation(name: "ClientOrders", fields: [userId], references: [id])
+  seller         User         @relation(name: "SellerOrders", fields: [sellerUserId], references: [id])
+  address        OrderAddress @relation(fields: [orderAddressId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
+  userId         Int
+  orderAddressId Int
+  sellerUserId   Int
+}
+
+model OrderDetail {
+  id              Int      @id @unique @default(autoincrement())
+  name            String
+  quantity        Int
+  priceSale       Float?
+  originalPrice   Float
+  percentDiscount Float?
+  discount        Float?
+  isIva           Boolean  @default(false)
+  isInventoried   Boolean  @default(false)
+  subtotal        Float
+  total           Float
+  product         Product  @relation(fields: [productId], references: [id])
+  price           Price    @relation(fields: [priceId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+  productId       Int
+  priceId         Int
+}
+
+model Address {
+  id           Int            @id @unique @default(autoincrement())
+  name         String?
+  phone        String
+  address      String
+  country      Country        @relation(fields: [countryId], references: [id])
+  state        State          @relation(fields: [stateId], references: [id])
+  city         City           @relation(fields: [cityId], references: [id])
+  user         User?          @relation(fields: [userId], references: [id])
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now()) @updatedAt
+  countryId    Int
+  stateId      Int
+  cityId       Int
+  userId       Int?
+  OrderAddress OrderAddress[]
+}
+
+model OrderAddress {
+  id        Int      @id @unique @default(autoincrement())
+  name      String?
+  phone     String
+  country   Country  @relation(fields: [countryId], references: [id])
+  state     State    @relation(fields: [stateId], references: [id])
+  city      City     @relation(fields: [cityId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
+  address   Address  @relation(fields: [addressId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  Order     Order[]
+  countryId Int
+  stateId   Int
+  cityId    Int
+  userId    Int?
+  addressId Int
+}
+
+enum Status {
+  REGISTERED
+  PROCESSING
+  PREPARING
+  BILLED
+}
