@@ -1,0 +1,31 @@
+import { Model } from 'sequelize-typescript';
+import { Address } from 'src/modules/address/entities/address.entity';
+import { Department } from 'src/modules/department/entities/department.entity';
+import { Image } from 'src/modules/image/entities/image.entity';
+import { Profile } from 'src/modules/profile/entities/profile.entity';
+import { Role } from 'src/modules/role/entities/role.entity';
+export declare class User extends Model<User> {
+    uuid: string;
+    name: string;
+    surname: string;
+    fullName: string;
+    phone: string;
+    ruc: string;
+    email: string;
+    password: string;
+    dateOfBirth: Date;
+    accountVerified: boolean;
+    isActive: boolean;
+    gender: string;
+    type: string;
+    departmentId: number;
+    department: Department;
+    profileId: number;
+    profile: Profile;
+    imageId: number;
+    image: Image;
+    roleId: number;
+    role: Role;
+    addresses: Address[];
+    static updateFullName(instance: User): void;
+}
