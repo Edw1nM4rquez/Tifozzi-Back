@@ -6,7 +6,8 @@ import { UniqueConstraintFilterFilter } from './filters/unique-constraint-filter
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'https://tifozzi.com', // Reemplaza con tu dominio
+    //origin: ['http://localhost:3001', 'http://localhost:4200'], // Reemplaza con tu dominio
+    origin:['https://tifozzi.com/', 'https://tifozzi-admin.vercel.app/'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 });
