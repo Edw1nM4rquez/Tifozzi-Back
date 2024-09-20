@@ -5,7 +5,11 @@ import * as cookieParser from 'cookie-parser';
 import { UniqueConstraintFilterFilter } from './filters/unique-constraint-filter.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  app.enableCors({
+    origin: 'https://tifozzi.com', // Reemplaza con tu dominio
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+});
   app.use(cookieParser());
   app.setGlobalPrefix('api/v1');
   //app.useGlobalPipes(new ValidateInputPipe());

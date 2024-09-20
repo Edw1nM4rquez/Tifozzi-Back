@@ -52,12 +52,7 @@ export const databaseProviders = [
         default:
           config = databaseConfig.development;
       }
-      const sequelize = new Sequelize({...config,  dialectOptions: {
-        ssl: {
-          require: true, // Asegura que Railway utilice SSL si está habilitado
-          rejectUnauthorized: false // Importante si Railway proporciona certificados autofirmados
-        }
-      }});
+      const sequelize = new Sequelize(config);
       sequelize.addModels([
         User,
         Country,

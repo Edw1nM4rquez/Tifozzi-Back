@@ -6,7 +6,11 @@ const cookieParser = require("cookie-parser");
 const unique_constraint_filter_filter_1 = require("./filters/unique-constraint-filter.filter");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
-    app.enableCors();
+    app.enableCors({
+        origin: 'https://tifozzi.com',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        credentials: true,
+    });
     app.use(cookieParser());
     app.setGlobalPrefix('api/v1');
     app.useGlobalFilters(new unique_constraint_filter_filter_1.UniqueConstraintFilterFilter());
