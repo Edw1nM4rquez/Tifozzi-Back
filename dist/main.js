@@ -7,7 +7,7 @@ const unique_constraint_filter_filter_1 = require("./filters/unique-constraint-f
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
-        origin: ['https://vite-react-ochre.vercel.app/', 'https://tifozzi-admin.vercel.app/'],
+        origin: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         credentials: true,
     });
